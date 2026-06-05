@@ -1,0 +1,275 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* —— 基础背景（浅暖白基底，透气不压迫）—— */
+  --bg: #FFFFFF;
+  --bg-0: #FBFAFF;                              /* body 最外层，极淡暖白 */
+  --bg-2: #F2F0FB;
+  --bg-soft: #F7F6FC;                           /* 区块底 */
+  --surface: #FFFFFF;                           /* 卡片表面 */
+
+  /* 首页 Hero 柔和彩色光晕（珊瑚→蓝紫，极淡）*/
+  --bg-gradient-from: #FFE4DB;                  /* 暖珊瑚光 */
+  --bg-gradient-to: #E4ECFF;                    /* 冷蓝紫光 */
+
+  /* —— 玻璃（浅色柔和版）—— */
+  --glass: rgba(255,255,255,0.72);
+  --glass-strong: rgba(255,255,255,0.90);
+  --hairline-top: rgba(255,255,255,0.9);
+  --glass-blur: 16px;
+
+  /* —— 文字（浅底深字）—— */
+  --text: #1E2230;                              /* 主文字，深而不黑，柔和 */
+  --text-muted: #5B6175;                        /* 次要文字 */
+  --text-subtle: #9298AB;                       /* 辅助/占位 */
+
+  /* —— 边框 —— */
+  --border: #ECE9F4;                            /* 浅紫调描边 */
+  --border-strong: #DAD6E8;
+
+  /* —— 品牌：珊瑚橙亲和色为主 + 蓝紫为辅 —— */
+  --brand: #FF6B5C;                             /* 珊瑚橙，亲和、不压迫 */
+  --brand-300: #FF897C;
+  --brand-deep: #ED5040;                        /* hover */
+  --brand-soft: #FFE9E4;                        /* 珊瑚浅底 */
+  --accent: #6C5CE7;                            /* 辅色 蓝紫 */
+  --accent-soft: #ECE9FB;
+  --teal: #12B886;
+
+  /* —— 风险语义色（浅底版：浅色块 + 深文字，AA 达标）—— */
+  --risk-low: #0E9F6E;
+  --risk-low-bg: #E6F7F0;
+  --risk-low-border: #B5E6D3;
+  --risk-verify: #B57E0A;
+  --risk-verify-strong: #E6A700;
+  --risk-verify-bg: #FFF6E0;
+  --risk-verify-border: #F1DFA3;
+  --risk-high: #D9531E;
+  --risk-high-bg: #FFEDE3;
+  --risk-high-border: #F6C5A6;
+  --risk-block: #D11F3A;
+  --risk-block-bg: #FDE8EB;
+  --risk-block-border: #F4B5BE;
+
+  --highlight-bg: #FFF0A6;
+  --highlight-underline: #ED5040;
+  --focus-ring: #6C5CE7;
+  --success: #0E9F6E;
+  --shadow-color: 60, 50, 90;                   /* 柔和带紫调阴影，不用纯黑 */
+  --brand-shadow: 255, 107, 92;                 /* 珊瑚色阴影 */
+  --orb-glow: 255, 137, 124;
+
+  /* —— 渐变 —— */
+  --grad-text: linear-gradient(95deg, #FF6B5C, #6C5CE7);
+  --grad-btn: linear-gradient(180deg, #FF897C, #FF6B5C);
+
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  --font-display: 'Poppins', 'Noto Sans SC', system-ui, sans-serif;
+  --font-body: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg-0);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+  ::selection { background: var(--accent-soft); }
+}
+
+@layer components {
+  /* —— 主按钮（蓝紫渐变胶囊 + 蓝色发光）—— */
+  .btn-primary {
+    font-family: var(--font-display); font-weight: 600; font-size: 17px;
+    color: #fff; background: var(--grad-btn);
+    padding: 16px 32px; border-radius: var(--radius-pill); border: none;
+    box-shadow: 0 8px 30px rgba(var(--brand-shadow), 0.45);
+    cursor: pointer; min-height: 48px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, filter .18s ease;
+  }
+  .btn-primary:hover { filter: brightness(1.06); transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(var(--brand-shadow), 0.55); }
+  .btn-primary:active { transform: translateY(0) scale(.98); }
+  .btn-primary:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+  .btn-primary:disabled { background: var(--glass-strong); color: var(--text-subtle);
+    box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* —— 次按钮（玻璃态）—— */
+  .btn-secondary {
+    font-family: var(--font-display); font-weight: 600; font-size: 16px;
+    color: var(--text); background: var(--glass);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    padding: 14px 28px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border); min-height: 48px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all .18s ease;
+  }
+  .btn-secondary:hover { background: var(--glass-strong); border-color: var(--border-strong); color: var(--text); }
+  .btn-secondary:active { transform: scale(.98); }
+  .btn-secondary:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+  .btn-secondary:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* —— 玻璃卡片 —— */
+  .card {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: 0 8px 28px rgba(var(--shadow-color), 0.08);
+    transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(var(--shadow-color), 0.12); }
+
+  /* —— 风险等级卡（深玻璃底 + 高饱和描边/标题色）—— */
+  .risk-card { border-radius: var(--radius-lg); padding: 24px; border: 1.5px solid;
+    position: relative; overflow: hidden;
+    -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur)); }
+  .risk-card[data-level="low"]    { background: var(--risk-low-bg);    border-color: var(--risk-low-border);    color: var(--risk-low); }
+  .risk-card[data-level="verify"] { background: var(--risk-verify-bg); border-color: var(--risk-verify-border); color: var(--risk-verify); }
+  .risk-card[data-level="high"]   { background: var(--risk-high-bg);   border-color: var(--risk-high-border);   color: var(--risk-high); }
+  .risk-card[data-level="block"]  { background: var(--risk-block-bg);  border-color: var(--risk-block-border);  color: var(--risk-block); }
+  .risk-card .risk-desc { color: var(--text-muted); }
+
+  /* —— 标签 —— */
+  .tag { display: inline-flex; align-items: center; gap: 6px;
+    font-weight: 600; font-size: 12px; line-height: 1; letter-spacing: .04em; padding: 7px 12px;
+    border-radius: var(--radius-pill); border: 1px solid var(--border);
+    background: var(--glass); color: var(--text-muted); }
+  .tag[data-sev="block"] { color: var(--risk-block); background: var(--risk-block-bg); border-color: var(--risk-block-border); }
+  .tag[data-sev="high"]  { color: var(--risk-high);  background: var(--risk-high-bg);  border-color: var(--risk-high-border); }
+  .tag[data-sev="positive"] { color: var(--teal); }
+
+  /* —— 高危原文高亮 —— */
+  .hl { background: var(--highlight-bg); padding: 1px 4px; border-radius: 4px; font-weight: 600; color: var(--text);
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    text-decoration: underline wavy var(--highlight-underline); text-underline-offset: 3px;
+    word-break: break-word; }
+
+  /* —— 输入框（玻璃态）—— */
+  .field { width: 100%; font-family: var(--font-body); font-size: 16px; line-height: 1.7; color: var(--text);
+    background: var(--glass); border: 1.5px solid var(--border-strong);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-radius: var(--radius); padding: 16px; transition: border-color .18s, box-shadow .18s; }
+  .field::placeholder { color: var(--text-subtle); }
+  .field:hover { border-color: var(--brand-300); }
+  .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+
+  /* —— 可复制项 —— */
+  .copy-item { display: flex; gap: 12px; align-items: flex-start;
+    padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--glass); transition: border-color .18s, background .18s; }
+  .copy-item:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .copy-btn { color: var(--brand-300); font-weight: 600; white-space: nowrap; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px; background: none; border: none; font-size: 14px; }
+  .copy-btn[data-copied="true"] { color: var(--success); }
+}
+
+/* —— 动效 L2 —— */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes riskPop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes gradientFlow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes pulseDots { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+.reveal { opacity: 0; }
+.reveal.in { animation: fadeInUp .5s cubic-bezier(.22,.61,.36,1) forwards; }
+.risk-card.in { animation: riskPop .45s cubic-bezier(.34,1.4,.64,1) forwards; }
+.copy-btn[data-copied="true"] .icon { animation: pop .35s ease; }
+
+.gradient-text {
+  background: var(--grad-text);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  font-style: italic;
+  animation: gradientFlow 6s linear infinite;
+}
+
+/* —— 主标题（浅底深炭灰渐变，清晰有质感不死板）—— */
+.text-metal {
+  background: linear-gradient(180deg, #2A2F40 0%, #1E2230 60%, #3A2E3C 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+/* —— Hero 主按钮：白底 + 圆形箭头（参考图标志性 CTA）—— */
+.btn-hero {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-display); font-weight: 600; font-size: 16px;
+  color: #fff; background: var(--grad-btn);
+  padding: 8px 8px 8px 24px; border-radius: var(--radius-pill); border: none;
+  box-shadow: 0 10px 26px rgba(var(--brand-shadow), 0.32);
+  cursor: pointer; min-height: 52px;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+}
+.btn-hero .btn-hero-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.22); color: #fff; flex-shrink: 0;
+  transition: transform .18s ease;
+}
+.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(var(--brand-shadow), 0.42); }
+.btn-hero:hover .btn-hero-ico { transform: translateX(2px); }
+.btn-hero:active { transform: translateY(0) scale(.98); }
+.btn-hero:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+
+/* —— Hero 幽灵次按钮（▷ Watch / Book a call）—— */
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-display); font-weight: 600; font-size: 16px;
+  color: var(--text); background: transparent; border: none;
+  padding: 14px 18px; cursor: pointer; transition: color .18s ease, opacity .18s ease;
+}
+.btn-ghost:hover { color: var(--brand-300); }
+
+
+/* 首页氛围背景：浅暖白 + 顶部柔和双色光晕（珊瑚 + 蓝紫，透气不压迫）*/
+.hero-glow {
+  position: relative;
+  background:
+    radial-gradient(55% 45% at 18% 2%, var(--bg-gradient-from) 0%, transparent 55%),
+    radial-gradient(55% 45% at 88% 6%, var(--bg-gradient-to) 0%, transparent 55%),
+    linear-gradient(180deg, #FBFAFF 0%, #FFFFFF 60%);
+}
+/* 极淡网格纹理叠加 */
+.hero-glow::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(108,92,231,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108,92,231,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(120% 70% at 50% 0%, #000 0%, transparent 70%);
+  mask-image: radial-gradient(120% 70% at 50% 0%, #000 0%, transparent 70%);
+}
+.hero-glow > * { position: relative; z-index: 1; }
+
+.loading-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--brand-300); box-shadow: 0 0 12px rgba(var(--brand-shadow), .6);
+  animation: pulseDots 1.2s infinite ease-in-out; }
+
+/* 玻璃模糊兜底：不支持 backdrop-filter 时回退为不透明深底 */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .card, .field, .btn-secondary, .copy-item, .tag, .risk-card { background: var(--bg-soft); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, .reveal.in, .risk-card.in, .copy-btn .icon, .gradient-text, .loading-dot {
+    animation: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .gradient-text { -webkit-text-fill-color: var(--brand-300); color: var(--brand-300); }
+}
