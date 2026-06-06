@@ -78,6 +78,18 @@ const cases: Case[] = [
     expectLevel: "high",
     expectTagsInclude: ["面试地址异常"],
   },
+  {
+    name: "拆字绕过：押·金（去噪后应命中收费）",
+    text: "入职需先缴纳押·金 500 元，转正后退还。",
+    expectLevel: "block",
+    expectTagsInclude: ["收费/押金风险"],
+  },
+  {
+    name: "反误伤：3.5k 薪资不应被去噪重组误报",
+    text: "岗位薪资 3.5k-6k，签订劳动合同，地点公司总部。",
+    jobType: "全职",
+    expectLevel: "low",
+  },
 ];
 
 let pass = 0;
@@ -110,5 +122,20 @@ for (const c of cases) {
   }
 }
 
-console.log(`\n———— ${pass} 通过 / ${fail} 失败 / 共 ${cases.length} ————`);
+// 专项断言：去噪补扫命中的高亮锚点必须是原文里能定位到的带噪片段，
+// 否则结果页 HighlightedText 的 indexOf 匹配不到、命中证据无法高亮。
+{
+  const noisyText = "入职需先缴纳押·金 500 元。";
+  const r = score(noisyText, "未知");
+  const allHighlightsLocatable = r.highlightedPhrases.every((p) => noisyText.includes(p));
+  if (allHighlightsLocatable && r.highlightedPhrases.some((p) => p.includes("·"))) {
+    pass++;
+    console.log(`✅ 去噪命中高亮锚点为原文带噪片段（可在原文高亮）  →  [${r.highlightedPhrases.join("、")}]`);
+  } else {
+    fail++;
+    console.log(`❌ 去噪命中高亮锚点应为原文带噪片段  →  实际 [${r.highlightedPhrases.join("、")}]`);
+  }
+}
+
+console.log(`\n———— ${pass} 通过 / ${fail} 失败 / 共 ${cases.length + 1} ————`);
 process.exit(fail > 0 ? 1 : 0);

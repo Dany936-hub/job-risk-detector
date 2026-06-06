@@ -140,9 +140,43 @@ function detectPositives(text: string): string[] {
  * 反规避归一化：去掉夹在字符间的分隔噪声（中点·、空格、*-_~等），
  * 用于二次扫描，识别"押·金""保 证 金"这类拆字/插符绕过。
  * 仅用于"是否命中"的判定，不用于高亮（高亮仍以原文为准）。
+ *
+ * 注意：不剥离 "." 与 "/"——它们是正常文本的高频字符（3.5k、A/B、网址 t.cn/x），
+ * 剥离会把它们重组成原文不存在的关键词造成误报；而拆字绕过实际几乎只用
+ * 中点/空格/全角符号，故无需为此牺牲准确率。
  */
 function denoise(text: string): string {
-  return text.replace(/[·•・.\s*\-_~|/\\]+/g, "");
+  return text.replace(/[·•・\s*\-_~|\\]+/g, "");
+}
+
+/** denoise 剥离的噪声字符集合（与 denoise 正则保持同步），用于在原文中定位带噪片段 */
+const NOISE_CHAR = /[·•・\s*\-_~|\\]/;
+
+/**
+ * 在原文中定位被噪声打散的 pattern，返回其带噪原文片段与起始下标。
+ * 例如原文含 "押·金"、pattern 为 "押金" → 返回 { snippet: "押·金", index }。
+ * 用于让去噪补扫命中也能在结果页正确高亮、并展示真实原文证据（而非干净 pattern）。
+ * 找不到（理论上不会，因为调用前已确认 denoise 后命中）则返回 null。
+ */
+function locateNoisy(text: string, pattern: string): { snippet: string; index: number } | null {
+  for (let start = 0; start < text.length; start++) {
+    let ti = start;
+    let pi = 0;
+    while (pi < pattern.length && ti < text.length) {
+      if (text[ti] === pattern[pi]) {
+        ti++;
+        pi++;
+      } else if (NOISE_CHAR.test(text[ti])) {
+        ti++; // 跳过噪声字符
+      } else {
+        break; // 非噪声且不匹配 → 此 start 失败
+      }
+    }
+    if (pi === pattern.length) {
+      return { snippet: text.slice(start, ti), index: start };
+    }
+  }
+  return null;
 }
 
 export function score(text: string, jobType: JobType = "未知"): ScoringResult {
@@ -179,7 +213,14 @@ export function score(text: string, jobType: JobType = "未知"): ScoringResult 
           const delta = rule.ctx[jobType as Exclude<JobType, "未知">];
           if (typeof delta === "number") eff = bump(eff, delta);
         }
-        allHits.push({ rule, matchedText: pattern, index: -1, effectiveSeverity: eff });
+        // 用原文里被打散的真实片段作为证据/高亮锚点，使结果页能正确高亮（indexOf 命中）
+        const located = locateNoisy(text, pattern);
+        allHits.push({
+          rule,
+          matchedText: located?.snippet ?? pattern,
+          index: located?.index ?? -1,
+          effectiveSeverity: eff,
+        });
       }
     }
   }

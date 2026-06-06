@@ -6,7 +6,7 @@
 
 import { score, LEVEL_LABEL, LEVEL_NOTE } from "./scoring";
 import { RULES } from "./rules";
-import { buildMessages } from "./prompt";
+import { buildMessages, sanitize } from "./prompt";
 import { chatJSON, getLLMConfig, LLMError, type LLMConfig } from "./llm";
 import type { RiskReport, ScoringResult, JobType, RiskTag, AskQuestion, RiskLevel } from "./types";
 
@@ -87,11 +87,14 @@ export function fallbackReport(s: ScoringResult): RiskReport {
     }
   }
 
+  // 规则库内置文案里含"诈骗/骗局/违法"等定性词（见 rules.ts），面向用户的报告
+  // 须与"只做风险提示、不做真伪定性"的红线一致——统一过 sanitize 收敛为中性表述。
+  // evidence 是用户原文证据，保留原样不改写。
   const riskReasons = Array.from(byTag.entries()).map(([tag, { evidence, rule }]) => ({
     tag,
     evidence: evidence.join("、"),
-    explanation: `${rule.whyRisky}${rule.consequence}`,
-    suggestion: rule.suggestion,
+    explanation: sanitize(`${rule.whyRisky}${rule.consequence}`),
+    suggestion: sanitize(rule.suggestion),
   }));
 
   const questions = buildQuestions(s);
@@ -243,9 +246,11 @@ export function mergeReport(s: ScoringResult, llm: LLMPart): RiskReport {
     })
     .map((r) => ({
       tag: r.tag as RiskTag,
+      // evidence 是原文证据，保留原样（不能改写用户原文）；
+      // explanation/suggestion 是 LLM 生成文案，过红线词清洗兜底守产品红线。
       evidence: String(r.evidence ?? ""),
-      explanation: String(r.explanation),
-      suggestion: String(r.suggestion ?? ""),
+      explanation: sanitize(String(r.explanation)),
+      suggestion: sanitize(String(r.suggestion ?? "")),
     }));
   // 若 LLM 漏了某些规则命中标签，用兜底补齐
   const covered = new Set(reasons.map((r) => r.tag));
@@ -271,9 +276,13 @@ export function mergeReport(s: ScoringResult, llm: LLMPart): RiskReport {
 
   const score = scoreForLevel(level, s.hits.length, finalTags.length);
 
-  const questions = normalizeQuestions(llm.questionsToAsk);
-  const checklist = arr(llm.verificationChecklist);
-  const privacy = arr(llm.privacyWarning);
+  // LLM 生成文案统一过红线词清洗（兜底守产品红线）；规则兜底文案本就合规无需重复洗。
+  const questions = normalizeQuestions(llm.questionsToAsk).map((q) => ({
+    q: sanitize(q.q),
+    why: q.why ? sanitize(q.why) : undefined,
+  }));
+  const checklist = arr(llm.verificationChecklist).map(sanitize);
+  const privacy = arr(llm.privacyWarning).map(sanitize);
 
   return {
     riskLevel: level, // LLM 主判（不低于规则下限）
@@ -284,7 +293,7 @@ export function mergeReport(s: ScoringResult, llm: LLMPart): RiskReport {
     questionsToAsk: (questions.length ? questions : fb.questionsToAsk).slice(0, 5),
     verificationChecklist: (checklist.length ? checklist : fb.verificationChecklist).slice(0, 7),
     privacyWarning: privacy.length ? privacy : fb.privacyWarning,
-    summary: llm.summary?.trim() || fb.summary,
+    summary: llm.summary?.trim() ? sanitize(llm.summary.trim()) : fb.summary,
   };
 }
 

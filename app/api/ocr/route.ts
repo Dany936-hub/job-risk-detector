@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { ocrImage } from "@/lib/ocr";
 import { LLMError } from "@/lib/llm";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
+
+// OCR 走视觉模型、更贵，限得更紧：每 IP 每分钟 6 次
+const RATE_LIMIT = 6;
+const RATE_WINDOW_MS = 60_000;
 
 // 接收前端上传的图片（base64 data URL），用视觉模型识别成文字返回。
 // 不保存图片，识别完即丢弃，符合"不保存用户内容"的隐私策略。
@@ -14,6 +19,14 @@ const MAX_DATA_URL_LEN = 8 * 1024 * 1024;
 const MAX_IMAGES = 6;
 
 export async function POST(req: Request) {
+  const rl = rateLimit(`ocr:${clientIp(req)}`, RATE_LIMIT, RATE_WINDOW_MS);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "识别请求过于频繁，请稍后再试" },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
