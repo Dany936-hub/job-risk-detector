@@ -1,5 +1,10 @@
 # 岗位避坑检测器
 
+[![Release](https://img.shields.io/github/v/release/Dany936-hub/job-risk-detector?label=release)](https://github.com/Dany936-hub/job-risk-detector/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
 面向年轻求职者的招聘风险提示工具：粘贴岗位描述 / 招聘聊天内容（或上传截图），识别收费陷阱、培训贷、刷单返利、站外引流、境外高薪、两卡等高危信号，生成可复制的安全追问话术与核验清单。
 
 > 本工具做的是**话术风险体检**，不做**公司背景调查**；只提供风险提示，不对任何公司或岗位做真假定性。
@@ -96,3 +101,9 @@ KB_MAX_MONTHS=3 npm run check:freshness
 - **扩知识库**：只收录能在官方 / 政府官网核实的内容，措辞贴近原文，不编造文件名或条款。来源链接易失效，调整时只改 `app/knowledge/data.ts`。
 - **加规则**：在 `lib/rules.ts` 追加规则对象即可，无需改判级引擎；新增风险标签需同步 `lib/types.ts`、`lib/analyze.ts`(VALID_TAGS)、`components/risk-meta.ts`。
 - **改判级逻辑后**：先 `npm run eval` 看规则层，再 `npm run eval:llm` 看真实漏报率。
+
+## 许可证
+
+[MIT](./LICENSE) © 2026 Dany936-hub
+
+> 免责声明：本工具仅提供风险提示，不构成法律判断，也不对任何公司或岗位做真假定性。最终决定请结合自身判断与官方渠道核验。
