@@ -94,6 +94,36 @@ async function main() {
   });
   check("无证据的 LLM 新增标签被丢弃", !fakeTag.riskTags.includes("收费/押金风险"));
 
+  // —— 用例6：产品红线——LLM 输出里的定性词被确定性清洗（不依赖模型自觉） ——
+  // 即使 LLM 越线输出"诈骗/违法/公司是假的"，合并后的报告也不得出现这些定性词。
+  const redline = mergeReport(sBlock, {
+    assessedLevel: "block",
+    riskReasons: [
+      {
+        tag: "刷单返利风险",
+        evidence: "先垫付后返本金",
+        explanation: "这是典型的刷单诈骗，属于违法行为。",
+        suggestion: "立即停止，这家公司是假的。",
+      },
+    ],
+    questionsToAsk: [{ q: "你们是不是骗子？", why: "怕被骗局坑了。" }],
+    verificationChecklist: ["核实是否为诈骗团伙"],
+    privacyWarning: ["小心诈骗"],
+    summary: "该岗位涉嫌诈骗，公司是假的，属于违法犯罪。",
+  });
+  const allText = [
+    redline.summary,
+    ...redline.riskReasons.flatMap((r) => [r.explanation, r.suggestion]),
+    ...redline.questionsToAsk.flatMap((q) => [q.q, q.why ?? ""]),
+    ...redline.verificationChecklist,
+    ...redline.privacyWarning,
+  ].join(" ");
+  const REDLINE_WORDS = ["诈骗", "骗局", "骗子", "违法", "犯罪", "是假的"];
+  const leaked = REDLINE_WORDS.filter((w) => allText.includes(w));
+  check("LLM 输出的红线定性词被清洗", leaked.length === 0, `泄漏: ${leaked.join("、")}`);
+  // 清洗后仍应保留可读内容（不能把整段抹空）
+  check("清洗后报告内容仍非空", redline.summary.length > 0 && redline.riskReasons.length > 0);
+
   console.log(`\n———— ${pass} 通过 / ${fail} 失败 ————`);
   process.exit(fail > 0 ? 1 : 0);
 }
