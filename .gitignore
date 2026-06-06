@@ -18,3 +18,7 @@ build/
 *.log
 .vscode/
 .idea/
+
+# 内部文档草稿（PRD 等，不入公开仓库）
+*.pdf
+PRD*
